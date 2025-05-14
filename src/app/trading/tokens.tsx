@@ -1,6 +1,5 @@
 'use client';
 import { Token } from "@berachain-foundation/berancer-sdk"
-import { useAccount } from "wagmi";
 import { BERA_TOKEN_ADDRESS, HONEY_TOKEN_ADDRESS, IBERA_TOKEN_ADDRESS, USDC_TOKEN_ADDRESS, WBERA_TOKEN_ADDRESS } from "../constants/constant";
 
 const chainId = 80094; // bera mainnet chain id

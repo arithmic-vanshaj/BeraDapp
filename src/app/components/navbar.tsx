@@ -1,9 +1,7 @@
 'use client';
-
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
-import React, {useState} from 'react';
-import { useAccount, useBalance } from 'wagmi';
+import React from 'react';
 
 const Navbar = () => {
     return (

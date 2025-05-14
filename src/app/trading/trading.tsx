@@ -1,13 +1,13 @@
 'use client';
-import React, { useState, useEffect, useMemo}  from "react";
-import { useAccount, useBalance, useWalletClient, useWriteContract } from "wagmi";
-import { BalancerApi, TokenAmount, SwapKind, Swap, Slippage, VAULT, vaultV2Abi } from "@berachain-foundation/berancer-sdk";
-import { call, sendTransaction, simulateContract, waitForTransactionReceipt, writeContract } from "viem/actions";
-import { createPublicClient, erc20Abi, http, parseEther } from "viem";
-import { BeraToken, HoneyToken, iBERAToken, WBERAToken } from "./tokens";
-import { BERA_TOKEN_ADDRESS, BERACHAIN_BASE_API, honey_abi, MAX_UINT256, reward_vault_abi, RPC_URL, VAULT_ADDRESS, wbera_abi, WBERA_TOKEN_ADDRESS } from "../constants/constant";
+import React, { useState, useEffect}  from "react";
+import { useAccount, useBalance, useWalletClient } from "wagmi";
+import { BalancerApi, TokenAmount, SwapKind, Swap, Slippage } from "@berachain-foundation/berancer-sdk";
+import { call, sendTransaction, simulateContract, waitForTransactionReceipt } from "viem/actions";
+// import { createPublicClient, erc20Abi, http, parseEther } from "viem";
+import { BeraToken, HoneyToken } from "./tokens";
+import { BERA_TOKEN_ADDRESS, BERACHAIN_BASE_API, honey_abi, reward_vault_abi, RPC_URL, VAULT_ADDRESS, WBERA_TOKEN_ADDRESS } from "../constants/constant";
 import { config, publicClient } from "../providers";
-import { ethers } from "ethers";
+import { parseEther } from "viem";
 
 type Strategy = 'high' | 'slow' | 'safe' | null; 
 
@@ -162,70 +162,71 @@ export default function BeraAITrader() {
     const balancerApi = new BalancerApi(BERACHAIN_BASE_API, chain?.id || 80094);
     
     // // wrapping function 
-    //   const wrapToken = async () => {
-    //     // checking the gasPrice
-    //   const gasPrice = await publicClient.getGasPrice();
-    //   const adjustedGasPrice = (BigInt(gasPrice) * BigInt(120)) / BigInt(100); 
-    //   console.log("Adjusted gas price: ", adjustedGasPrice);
+      const wrapToken = async () => {
       
-    //   console.log("starting the wrapping ")
-    //   const [address] = await walletClient.getAddresses();
+        // checking the gasPrice
+      const gasPrice = await publicClient.getGasPrice();
+      const adjustedGasPrice = (BigInt(gasPrice) * BigInt(120)) / BigInt(100); 
+      console.log("Adjusted gas price: ", adjustedGasPrice);
+      
+      console.log("starting the wrapping ")
+      const [address] = await walletClient.getAddresses();
 
-    //   setIsWrapping(true);
-    //   setError('');
-    //   setTxStatus(" Starting the wrapping ");
+      setIsWrapping(true);
+      setError('');
+      setTxStatus(" Starting the wrapping ");
 
-    //   try {
-    //       const gasLimit = await publicClient.estimateContractGas({
-    //           address: WBERA_TOKEN_ADDRESS,
-    //           abi: tokenAbi,
-    //           functionName: 'deposit',
-    //           account: address,
-    //           value: parseEther(amount),
-    //       })
+      try {
+          const gasLimit = await publicClient.estimateContractGas({
+              address: WBERA_TOKEN_ADDRESS,
+              abi: tokenAbi,
+              functionName: 'deposit',
+              account: address,
+              value: parseEther(amount),
+          })
 
-    //       console.log("Estimated gas limit: ", gasLimit);
+          console.log("Estimated gas limit: ", gasLimit);
 
-    //       const { request } = await publicClient.simulateContract({
-    //           address: WBERA_TOKEN_ADDRESS,
-    //           abi: tokenAbi,
-    //           functionName: 'deposit',
-    //           account: address,
-    //           value: parseEther(amount),
-    //           gas: BigInt(1000000),
-    //           gasPrice: adjustedGasPrice,
-    //       });
+          const { request } = await publicClient.simulateContract({
+              address: WBERA_TOKEN_ADDRESS,
+              abi: tokenAbi,
+              functionName: 'deposit',
+              account: address,
+              value: parseEther(amount),
+              gas: BigInt(1000000),
+              gasPrice: adjustedGasPrice,
+          });
 
-    //       console.log("simulated request: ", request);
+          console.log("simulated request: ", request);
 
-    //       console.log(" started with the write contract ")
-    //       const hash = await walletClient.writeContract(request);
-    //       setTxHash(hash);
-    //       setTxStatus(" Transaction sent, waiting for confirmation...");
+          console.log(" started with the write contract ")
+          const hash = await walletClient.writeContract(request);
+          setTxHash(hash);
+          setTxStatus(" Transaction sent, waiting for confirmation...");
 
-    //       const receipt = await publicClient.waitForTransactionReceipt({
-    //           hash, 
-    //           retryCount: 3,
-    //           timeout: 60_000, // 1 minute timeout
+          const receipt = await publicClient.waitForTransactionReceipt({
+              hash, 
+              retryCount: 3,
+              timeout: 60_000, // 1 minute timeout
 
-    //       });
-    //       console.log("Tx receipt: ", receipt);
+          });
+          console.log("Tx receipt: ", receipt);
 
-    //       if (receipt.status === "success"){
-    //           setTxStatus ("Transaction confirmed!")
-    //       }
-    //       else {
-    //           setTxStatus("Transaction completed but may have failed. Please check your wallet")
-    //       }
-    //   }
-    //   catch (error) {
-    //       console.error(" Error in wrapping BERA: ", error)
-    //       setError(error instanceof Error ? error.message : 'Unknown error occurred');
-    //       setTxStatus('');
-    //   }finally{
-    //       setIsWrapping(false);
-    //   }
-    // }
+          if (receipt.status === "success"){
+              setTxStatus ("Transaction confirmed!")
+          }
+          else {
+              setTxStatus("Transaction completed but may have failed. Please check your wallet")
+          }
+      }
+      catch (error) {
+          console.error(" Error in wrapping BERA: ", error)
+          setError(error instanceof Error ? error.message : 'Unknown error occurred');
+          setTxStatus('');
+      }finally{
+          setIsWrapping(false);
+      }
+    }
 
     // swapping function
     const swapToken = async () => {
@@ -243,7 +244,7 @@ export default function BeraAITrader() {
         console.log("swapAmount: ", swapAmount);
         
         // fetch optimal swap paths
-        const { paths: sorPaths, routes } = await balancerApi.sorSwapPaths.fetchSorSwapPaths({
+        const { paths: sorPaths } = await balancerApi.sorSwapPaths.fetchSorSwapPaths({
           chainId: chainid,
           tokenIn: inToken.address,
           tokenOut: outToken.address,

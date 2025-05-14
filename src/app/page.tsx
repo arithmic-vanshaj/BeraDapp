@@ -2,7 +2,6 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useBalance } from "wagmi";
 import BeraAITrader from "./trading/trading";
-import Navbar from "./components/navbar";
 import WalletConnectInfo from "./components/walletconnectinfo";
 
 export default function Home() {
