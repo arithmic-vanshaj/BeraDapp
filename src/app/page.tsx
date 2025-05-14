@@ -1,103 +1,82 @@
-import Image from "next/image";
+'use client';
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount, useBalance } from "wagmi";
+import BeraAITrader from "./trading/trading";
+import Navbar from "./components/navbar";
+import WalletConnectInfo from "./components/walletconnectinfo";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const {address, isConnected, chain} = useAccount(); // get the address and connection status
+  const {
+    data: balanceData, // Contains balance info like formatted string, value (BigInt), symbol, decimals
+    isLoading: isBalanceLoading, // Loading state
+    isError: isBalanceError, // Error state
+    error: balanceError, // Error object if isError is true
+    refetch: refetchBalance, // Function to manually refetch balance
+   } = useBalance({
+    address: address,
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const isConnectedToBerachain = isConnected && (chain?.id === 80069 || chain?.id === 80085 || chain?.id === 80094);
+  // console.log("chain id: ", chain?.id)
+  const BeraChainNetwork = "Bera Chain Network"
+
+  return (
+    <div> 
+      {!isConnected && (
+        // State 1: Disconnected - Show Connect Button Centered
+        <div className="flex flex-col items-center justify-center pt-20 text-center">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+            Welcome to BeraStrat
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
+            Connect your wallet using WalletConnect or other providers to continue.
+          </p>
+          {/* Using RainbowKit's button handles WalletConnect automatically */}
+          <ConnectButton label="Connect Wallet" />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
+
+      {isConnected && (
+        // State 2: Connected - Show Two Columns or Network Warning
+        <>
+          {!isConnectedToBerachain && (
+             // Sub-State: Connected but WRONG network
+             <div className="mt-10 text-center p-6 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-400 dark:border-yellow-700 rounded-lg max-w-lg mx-auto">
+                <h2 className="text-xl font-semibold mb-2 text-yellow-800 dark:text-yellow-200">Network Alert</h2>
+                <p className="text-yellow-700 dark:text-yellow-300 mb-4">
+                    Please switch your wallet network to <span className="font-bold"> {BeraChainNetwork} </span> to use the strategy selector.
+                </p>
+                {/* The ConnectButton in Navbar or WalletInfo can handle the switch */}
+                 <ConnectButton.Custom>
+                    {({ openChainModal }) => (
+                       <button
+                           onClick={openChainModal}
+                           className="px-4 py-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded-md shadow-sm"
+                        >
+                           Switch to {BeraChainNetwork}
+                       </button>
+                    )}
+                 </ConnectButton.Custom>
+             </div>
+           )}
+
+          {isConnectedToBerachain && (
+             // Sub-State: Connected to CORRECT network - Show Two Columns
+            <div className="flex flex-col lg:flex-row gap-8 mt-6">
+              {/* Left Column: Wallet Info */}
+              <div className="w-full lg:w-1/3 flex-shrink-0">
+                 <WalletConnectInfo />
+              </div>
+
+              {/* Right Column: Trading Window (Strategy Selector) */}
+              <div className="w-full lg:w-2/3">
+                <BeraAITrader />
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
-  );
+   )
 }
