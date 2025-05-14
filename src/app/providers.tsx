@@ -6,7 +6,7 @@ import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { WagmiProvider } from 'wagmi';
 import { http } from 'wagmi';
 import { 
-  mainnet,
+  // mainnet,
   sepolia,
   berachainTestnet,
 } from 'wagmi/chains';

@@ -2,7 +2,7 @@
 import React, { useState, useEffect}  from "react";
 import { useAccount, useBalance, useWalletClient } from "wagmi";
 import { BalancerApi, TokenAmount, SwapKind, Swap, Slippage } from "@berachain-foundation/berancer-sdk";
-import { call, sendTransaction, simulateContract, waitForTransactionReceipt } from "viem/actions";
+import { waitForTransactionReceipt } from "viem/actions";
 // import { createPublicClient, erc20Abi, http, parseEther } from "viem";
 import { BeraToken, HoneyToken } from "./tokens";
 import { BERA_TOKEN_ADDRESS, BERACHAIN_BASE_API, honey_abi, reward_vault_abi, RPC_URL, VAULT_ADDRESS, WBERA_TOKEN_ADDRESS } from "../constants/constant";
@@ -12,14 +12,14 @@ import { parseEther } from "viem";
 type Strategy = 'high' | 'slow' | 'safe' | null; 
 
 // mocks data structure for swapping
-interface BeraPools{
-  poolid: string, 
-  poolapr: number,
-  pooltvl: number,
-  isRewardVault: boolean,
-  isVolatile: boolean,
+// interface BeraPools{
+//   poolid: string, 
+//   poolapr: number,
+//   pooltvl: number,
+//   isRewardVault: boolean,
+//   isVolatile: boolean,
 
-}
+// }
 interface MockPool{
     id: string;
     name: string; // e.g., "BERA / HONEY Pool"
@@ -34,7 +34,7 @@ interface MockPool{
 // suggestion structure for pools
 interface UserSuggestion {
     pool: MockPool;
-    reason: String;
+    reason: string;
 }
 
 const MOCK_POOLS: MockPool[] = [
@@ -68,13 +68,12 @@ export default function BeraAITrader() {
     const [txHash, setTxHash] = useState('');
     const [error, setError] = useState('');
     const [txStatus, setTxStatus] = useState('');
-    const [amount, setAmount] = useState('0.01');
 
     const chainid = chain?.id || 80094; 
-
     const inToken = BeraToken; // in token
     const outToken = HoneyToken; // out token after swap
     const tokenAbi = honey_abi;
+    const amount = "0.01"
   
     // Fetch user's BERA balance if connected
     const { data: beraBalance } =  useBalance({
@@ -163,8 +162,7 @@ export default function BeraAITrader() {
     
     // // wrapping function 
       const wrapToken = async () => {
-      
-        // checking the gasPrice
+       // checking the gasPrice
       const gasPrice = await publicClient.getGasPrice();
       const adjustedGasPrice = (BigInt(gasPrice) * BigInt(120)) / BigInt(100); 
       console.log("Adjusted gas price: ", adjustedGasPrice);
@@ -198,9 +196,10 @@ export default function BeraAITrader() {
           });
 
           console.log("simulated request: ", request);
-
           console.log(" started with the write contract ")
+
           const hash = await walletClient.writeContract(request);
+
           setTxHash(hash);
           setTxStatus(" Transaction sent, waiting for confirmation...");
 
@@ -218,18 +217,23 @@ export default function BeraAITrader() {
           else {
               setTxStatus("Transaction completed but may have failed. Please check your wallet")
           }
+          return hash;
       }
       catch (error) {
           console.error(" Error in wrapping BERA: ", error)
           setError(error instanceof Error ? error.message : 'Unknown error occurred');
           setTxStatus('');
       }finally{
-          setIsWrapping(false);
+          setIsWrapping(isWrapping);
       }
     }
 
     // swapping function
     const swapToken = async () => {
+      // wrap the BERA token first
+      const wrapHash = await wrapToken();
+      console.log("wrapHash: ", wrapHash);
+
       setIsSwapping(true);
       setError('');
       setTxStatus(" Preparing swap");
@@ -363,6 +367,9 @@ export default function BeraAITrader() {
         if (receipt.status === "success"){
           console.log("Transaction confirmed!");
           setTxStatus("Transaction confirmed!");
+          setIsSwapping(isSwapping);
+          setTxHash(txHash);
+          setError(error)
         }else{
           console.log("Transaction failed or reverted.");
           setTxStatus("Transaction completed but may have failed. Please check your wallet");
@@ -391,6 +398,7 @@ export default function BeraAITrader() {
       } catch (error) {
         console.log(" Error in swapping: ", error);
         setError(error instanceof Error ? error.message : 'Error occurred');
+        setTxStatus(txStatus)
       }
     }
    // what it returns
@@ -469,7 +477,7 @@ export default function BeraAITrader() {
                   <div className="mt-3 text-right">
                      <button className="px-5 cursor-pointer py-1 text-s bg-blue-500 text-white rounded"
                         onClick={() => swapToken()}>
-                        Wrap Token
+                        Swap Token
                      </button>
                    </div>
                    {/* --- End Placeholder --- */}

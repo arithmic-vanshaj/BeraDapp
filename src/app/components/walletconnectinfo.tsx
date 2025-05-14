@@ -41,9 +41,10 @@ const WalletConnectInfo = () => {
     data: balanceData,
     isLoading: isBalanceLoading,
     refetch: refetchBalance,
-  } = isConnected && address
-    ? useBalance({ address })
-    : { data: null, isLoading: false, refetch: () => {} };
+  } = useBalance({
+    address: address,
+    chainId: chain?.id || 80094
+  });
 
   if (!isConnected || !address) {
     // This component should ideally only be rendered when connected,

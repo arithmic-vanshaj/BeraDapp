@@ -1,21 +1,11 @@
 'use client';
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useBalance } from "wagmi";
+import { useAccount } from "wagmi";
 import BeraAITrader from "./trading/trading";
 import WalletConnectInfo from "./components/walletconnectinfo";
 
 export default function Home() {
-  const {address, isConnected, chain} = useAccount(); // get the address and connection status
-  const {
-    data: balanceData, // Contains balance info like formatted string, value (BigInt), symbol, decimals
-    isLoading: isBalanceLoading, // Loading state
-    isError: isBalanceError, // Error state
-    error: balanceError, // Error object if isError is true
-    refetch: refetchBalance, // Function to manually refetch balance
-   } = useBalance({
-    address: address,
-  });
-
+  const {isConnected, chain} = useAccount(); // get the address and connection status
   const isConnectedToBerachain = isConnected && (chain?.id === 80069 || chain?.id === 80085 || chain?.id === 80094);
   // console.log("chain id: ", chain?.id)
   const BeraChainNetwork = "Bera Chain Network"
