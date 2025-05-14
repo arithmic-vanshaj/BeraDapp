@@ -22,9 +22,9 @@ const Navbar = () => {
              <a href="https://hub.berachain.com/pools/" target="_blank" className="hidden sm:block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                Bera Pools
              </a>
-             <button className="hidden sm:block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+             <Link href="/about" className="hidden sm:block px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
               About
-             </button>
+             </Link>
              {/* Connect Button remains the primary way to connect/disconnect */}
              <ConnectButton
                 accountStatus="address" // Simplify display in navbar

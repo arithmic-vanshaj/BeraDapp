@@ -403,96 +403,104 @@ export default function BeraAITrader() {
     }
    // what it returns
     return (
-      <div className="w-full max-w-2xl p-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
-        <h2 className="text-2xl font-bold mb-4 text-center text-gray-800 dark:text-gray-100">Berachain Strategy Selector</h2>
-  
-        {/* User Balance Info (Example) */}
+      <div className="w-full max-w-2xl p-6 bg-white dark:bg-[#2F2B27] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 transition-all">
+        {/* Title */}
+        <h2 className="text-3xl font-extrabold mb-4 text-center text-gray-900 dark:text-white">
+          🧠 Berachain Strategy Selector
+        </h2>
+
+        {/* BERA Balance */}
         {beraBalance && (
           <p className="text-sm text-center mb-6 text-gray-600 dark:text-gray-400">
-            Your BERA Balance: {parseFloat(beraBalance.formatted).toFixed(4)} {beraBalance.symbol}
+            Your BERA Balance: <span className="font-semibold text-amber-600 dark:text-yellow-400">{parseFloat(beraBalance.formatted).toFixed(4)} {beraBalance.symbol}</span>
           </p>
         )}
-  
-  
+
         {/* Strategy Selection */}
-        <div className="mb-6">
+        <div className="mb-8">
           <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">Choose Your Growth Strategy:</h3>
-          <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <button
               onClick={() => handleStrategySelect('high')}
-              className={`px-4 py-2 rounded-md border transition-colors ${selectedStrategy === 'high'
+              className={`w-full sm:w-auto px-6 py-2 rounded-lg font-medium transition-all duration-200 border ${
+                selectedStrategy === 'high'
                   ? 'bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-700'
-                  : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100'
-                }`}
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
             >
-              🚀 High Rate Growth
+              🚀 High Growth
             </button>
-            <button disabled
+            <button
+              disabled
               onClick={() => handleStrategySelect('slow')}
-              className={`px-4 py-2 opacity-50 rounded-md border transition-colors ${selectedStrategy === 'slow'
-                  ? 'bg-yellow-500 text-white border-yellow-600 dark:bg-yellow-600 dark:border-yellow-700'
-                  : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100'
-                }`}
+              className="w-full sm:w-auto px-6 py-2 rounded-lg font-medium border opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600"
             >
-              🐢 Slow Rate Growth (soon)
+              🐢 Slow Growth (soon)
             </button>
-            <button disabled
+            <button
+              disabled
               onClick={() => handleStrategySelect('safe')}
-              className={`px-4 py-2 opacity-50 rounded-md border transition-colors ${selectedStrategy === 'safe'
-                  ? 'bg-green-500 text-white border-green-600 dark:bg-green-600 dark:border-green-700'
-                  : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100'
-                }`}
+              className="w-full sm:w-auto px-6 py-2 rounded-lg font-medium border opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600"
             >
               🛡️ Safe Growth (soon)
             </button>
           </div>
         </div>
-  
+
         {/* Suggestions Area */}
-        <div className="mt-6 min-h-[150px]"> {/* Added min-height */}
-          <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">Suggested Pools & Swaps:</h3>
+        <div className="mt-6 min-h-[160px]">
+          <h3 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-200">🔍 Suggested Pools & Swaps:</h3>
+
           {isLoadingSuggestions && (
-            <div className="flex justify-center items-center p-4">
-              <p className="text-gray-500 dark:text-gray-400 italic"> Finding best pools...</p>
-              {/* Optional: Add a spinner */}
+            <div className="flex justify-center items-center p-6">
+              <p className="text-gray-500 dark:text-gray-400 italic">Looking for optimal strategies...</p>
             </div>
           )}
-  
+
           {!isLoadingSuggestions && selectedStrategy && suggestions.length === 0 && (
-            <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
-              <p className="text-center text-gray-600 dark:text-gray-300">No specific pools found matching the criteria with current data.</p>
+            <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 text-center">
+              <p className="text-gray-600 dark:text-gray-300">No specific pools found matching the criteria with current data.</p>
             </div>
           )}
-  
+
           {!isLoadingSuggestions && suggestions.length > 0 && (
             <div className="space-y-4">
               {suggestions.map(({ pool, reason }, index) => (
-                <div key={pool.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
-                  <p className="font-semibold text-gray-800 dark:text-gray-100">{index + 1}. {pool.name} ({pool.tokens.join(' / ')})</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Reason: <span className="font-medium">{reason}</span></p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    You might need to swap your current assets into {pool.requiredTokens.join(' or ')} to provide liquidity.
+                <div
+                  key={pool.id}
+                  className="p-4 bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-[#3A2F29] dark:to-[#2C2522] border border-gray-200 dark:border-gray-600 rounded-xl shadow-md transition hover:shadow-lg"
+                >
+                  <p className="font-bold text-gray-900 dark:text-white mb-1">
+                    {index + 1}. {pool.name} <span className="text-sm text-gray-600 dark:text-gray-300">({pool.tokens.join(' / ')})</span>
                   </p>
-                  {/* --- Placeholder for Swap Action --- */}
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                    🔎 Reason: <span className="font-medium">{reason}</span>
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    You may need to swap into: <span className="font-semibold">{pool.requiredTokens.join(', ')}</span>
+                  </p>
+
                   <div className="mt-3 text-right">
-                     <button className="px-5 cursor-pointer py-1 text-s bg-blue-500 text-white rounded"
-                        onClick={() => swapToken()}>
-                        Swap Token
-                     </button>
-                   </div>
-                   {/* --- End Placeholder --- */}
+                    <button
+                      onClick={() => swapToken()}
+                      className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition"
+                    >
+                      🔁 Swap Token
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
-  
+
           {!isLoadingSuggestions && !selectedStrategy && (
-            <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
-              <p className="text-center text-gray-600 dark:text-gray-300">Please select a strategy above to see suggestions.</p>
+            <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 text-center">
+              <p className="text-gray-600 dark:text-gray-300">Please select a strategy to receive suggestions.</p>
             </div>
           )}
         </div>
       </div>
+
     );
 }
   

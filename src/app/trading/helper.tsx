@@ -1,7 +1,7 @@
 'use client'
 
 import { Address } from "viem";
-import { HONEY_TOKEN_ADDRESS, USDC_TOKEN_ADDRESS, WBERA_TOKEN_ADDRESS, WBTC_TOKEN_ADDRESS, WETH_TOKEN_ADDRESS } from "./constants/constant";
+import { HONEY_TOKEN_ADDRESS, USDC_TOKEN_ADDRESS, WBERA_TOKEN_ADDRESS, WBTC_TOKEN_ADDRESS, WETH_TOKEN_ADDRESS } from "../constants/constant";
 
 interface TokenInfo {
     address?: `0x${string}`;

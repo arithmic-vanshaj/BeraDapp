@@ -51,8 +51,7 @@ export default function Home() {
            )}
 
           {isConnectedToBerachain && (
-             // Sub-State: Connected to CORRECT network - Show Two Columns
-            <div className="flex flex-col lg:flex-row gap-8 mt-6">
+            <div className="flex flex-col lg:flex-row gap-8 mt-6 justify-center">
               {/* Left Column: Wallet Info */}
               <div className="w-full lg:w-1/3 flex-shrink-0">
                  <WalletConnectInfo />
