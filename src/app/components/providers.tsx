@@ -83,9 +83,8 @@ export const publicClient = createPublicClient({ // public actions
 const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
-
     const [mounted, setMounted] = React.useState(false);
-    React.useEffect(() => setMounted(true), []); // Hydration fix
+    React.useEffect(() => setMounted(true), []);
   
     return (
       <WagmiProvider config={config} >

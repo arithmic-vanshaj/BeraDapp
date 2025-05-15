@@ -7,7 +7,7 @@ const WBERA_TOKEN_ADDRESS="0x6969696969696969696969696969696969696969"
 const WBTC_TOKEN_ADDRESS="0x0555E30da8f98308EdB960aa94C0Db47230d2B9c"
 const WETH_TOKEN_ADDRESS="0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590"
 const RPC_URL = "https://rpc.berachain.com/"
-const MAX_UINT256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+const MAX_UINT256 = BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 const VAULT_ADDRESS = "0x4Be03f781C497A489E3cB0287833452cA9B9E80B"
 // exporting the token addresses
 export {

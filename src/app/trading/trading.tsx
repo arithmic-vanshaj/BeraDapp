@@ -1,13 +1,14 @@
 'use client';
 import React, { useState, useEffect}  from "react";
 import { useAccount, useBalance, useWalletClient } from "wagmi";
-import { BalancerApi, TokenAmount, SwapKind, Swap, Slippage } from "@berachain-foundation/berancer-sdk";
-import { waitForTransactionReceipt } from "viem/actions";
+import { BalancerApi, TokenAmount, SwapKind, Swap, Slippage, VAULT, vaultV2Abi } from "@berachain-foundation/berancer-sdk";
+import { sendTransaction, waitForTransactionReceipt } from "viem/actions";
 // import { createPublicClient, erc20Abi, http, parseEther } from "viem";
-import { BeraToken, HoneyToken } from "./tokens";
-import { BERA_TOKEN_ADDRESS, BERACHAIN_BASE_API, honey_abi, reward_vault_abi, RPC_URL, VAULT_ADDRESS, WBERA_TOKEN_ADDRESS } from "../constants/constant";
-import { config, publicClient } from "../providers";
+import { BeraToken, HoneyToken, iBERAToken, WBERAToken } from "./tokens";
+import { BERA_TOKEN_ADDRESS, BERACHAIN_BASE_API, honey_abi, MAX_UINT256 } from "../constants/constant";
+import { config, publicClient } from "../components/providers";
 import { parseEther } from "viem";
+import { wrap } from "module";
 
 type Strategy = 'high' | 'slow' | 'safe' | null; 
 
@@ -71,8 +72,10 @@ export default function BeraAITrader() {
 
     const chainid = chain?.id || 80094; 
     const inToken = BeraToken; // in token
-    const outToken = HoneyToken; // out token after swap
+    // const wraptoken = WBERAToken;
+    const outToken = iBERAToken; // out token after swap
     const tokenAbi = honey_abi;
+    // const wrapTokenAbi = wbera_abi;
     const amount = "0.01"
   
     // Fetch user's BERA balance if connected
@@ -161,78 +164,64 @@ export default function BeraAITrader() {
     const balancerApi = new BalancerApi(BERACHAIN_BASE_API, chain?.id || 80094);
     
     // // wrapping function 
-      const wrapToken = async () => {
-       // checking the gasPrice
-      const gasPrice = await publicClient.getGasPrice();
-      const adjustedGasPrice = (BigInt(gasPrice) * BigInt(120)) / BigInt(100); 
-      console.log("Adjusted gas price: ", adjustedGasPrice);
+    //   const wrapToken = async () => {
       
-      console.log("starting the wrapping ")
-      const [address] = await walletClient.getAddresses();
+    //   console.log("starting the wrapping ")
+    //   const [address] = await walletClient.getAddresses();
 
-      setIsWrapping(true);
-      setError('');
-      setTxStatus(" Starting the wrapping ");
+    //   setIsWrapping(true);
+    //   setError('');
+    //   setTxStatus(" Starting the wrapping ");
 
-      try {
-          const gasLimit = await publicClient.estimateContractGas({
-              address: WBERA_TOKEN_ADDRESS,
-              abi: tokenAbi,
-              functionName: 'deposit',
-              account: address,
-              value: parseEther(amount),
-          })
+    //   try {
 
-          console.log("Estimated gas limit: ", gasLimit);
+    //       const { request } = await publicClient.simulateContract({
+    //           address: WBERA_TOKEN_ADDRESS,
+    //           abi: wbera_abi,
+    //           functionName: 'deposit',
+    //           account: address,
+    //           value: parseEther(amount),
+    //           gas: BigInt(1000000),
+    //       });
 
-          const { request } = await publicClient.simulateContract({
-              address: WBERA_TOKEN_ADDRESS,
-              abi: tokenAbi,
-              functionName: 'deposit',
-              account: address,
-              value: parseEther(amount),
-              gas: BigInt(1000000),
-              gasPrice: adjustedGasPrice,
-          });
+    //       console.log("simulated request: ", request);
+    //       console.log(" started with the write contract ")
 
-          console.log("simulated request: ", request);
-          console.log(" started with the write contract ")
+    //       const hash = await walletClient.writeContract(request);
 
-          const hash = await walletClient.writeContract(request);
+    //       setTxHash(hash);
+    //       setTxStatus(" Transaction sent, waiting for confirmation...");
 
-          setTxHash(hash);
-          setTxStatus(" Transaction sent, waiting for confirmation...");
+    //       const receipt = await publicClient.waitForTransactionReceipt({
+    //           hash, 
+    //           retryCount: 3,
+    //           timeout: 60_000, // 1 minute timeout
 
-          const receipt = await publicClient.waitForTransactionReceipt({
-              hash, 
-              retryCount: 3,
-              timeout: 60_000, // 1 minute timeout
+    //       });
+    //       console.log("Tx receipt: ", receipt);
 
-          });
-          console.log("Tx receipt: ", receipt);
-
-          if (receipt.status === "success"){
-              setTxStatus ("Transaction confirmed!")
-          }
-          else {
-              setTxStatus("Transaction completed but may have failed. Please check your wallet")
-          }
-          return hash;
-      }
-      catch (error) {
-          console.error(" Error in wrapping BERA: ", error)
-          setError(error instanceof Error ? error.message : 'Unknown error occurred');
-          setTxStatus('');
-      }finally{
-          setIsWrapping(isWrapping);
-      }
-    }
+    //       if (receipt.status === "success"){
+    //           setTxStatus ("Transaction confirmed!")
+    //       }
+    //       else {
+    //           setTxStatus("Transaction completed but may have failed. Please check your wallet")
+    //       }
+    //       return hash;
+    //   }
+    //   catch (error) {
+    //       console.error(" Error in wrapping BERA: ", error)
+    //       setError(error instanceof Error ? error.message : 'Unknown error occurred');
+    //       setTxStatus('');
+    //   }finally{
+    //       setIsWrapping(isWrapping);
+    //   }
+    // }
 
     // swapping function
     const swapToken = async () => {
-      // wrap the BERA token first
-      const wrapHash = await wrapToken();
-      console.log("wrapHash: ", wrapHash);
+      // wrap the BERA token first to WBERA
+      // const wrapHash = await wrapToken();
+      // console.log("wrapHash: ", wrapHash);
 
       setIsSwapping(true);
       setError('');
@@ -248,7 +237,7 @@ export default function BeraAITrader() {
         console.log("swapAmount: ", swapAmount);
         
         // fetch optimal swap paths
-        const { paths: sorPaths } = await balancerApi.sorSwapPaths.fetchSorSwapPaths({
+        const { paths: sorPaths, routes } = await balancerApi.sorSwapPaths.fetchSorSwapPaths({
           chainId: chainid,
           tokenIn: inToken.address,
           tokenOut: outToken.address,
@@ -261,119 +250,44 @@ export default function BeraAITrader() {
           console.log("NO paths found to Swap Token")
         }
 
-        // // assets
-        // const assets = Array.from(new Set(routes.flatMap(route =>
-        //   route.hops.flatMap(hop => [hop.tokenIn, hop.tokenOut])
-        // ))) as `0x${string}`[];
-        // // swaps
-        // const batchSwaps = routes.flatMap(route => route.hops.map((hop, index) => ({
-        //     poolId: hop.poolId as `0x${string}`,
-        //     assetInIndex: BigInt(assets.indexOf(hop.tokenIn as `0x${string}`)),
-        //     assetOutIndex: BigInt(assets.indexOf(hop.tokenOut as `0x${string}`)),
-        //     amount: index === 0 ? BigInt(swapAmount.amount) : BigInt(0),
-        //     userData: '0x' as `0x${string}`
-        //   }))
-        // );
-        // funds
-        const funds = {
-          sender: address as `0x${string}`,
-          recipient: address as `0x${string}`,
-          fromInternalBalance: false,
-          toInternalBalance: false
-        };
-
-        // // limits
-        // const BatchLimits = assets.map((_, i) =>
-        //   i === 0 ? swapAmount.amount : -MAX_UINT256 // Note: `limits` is int256[]          
-        // );
-        // deadline
-        const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
-
-        const swapTxn = new Swap({
-          chainId: chainid, 
-          paths: sorPaths, 
-          swapKind: SwapKind.GivenIn, 
-          userData: '0x',
-        });
-
-         // // // Query current rates
-         const queryOutput = await swapTxn.query(RPC_URL);
-         console.log("queryOutput: ", queryOutput);
- 
-         // // Build transaction with 0.5% slippage
-         const slippage = Slippage.fromPercentage("0.5");
-         console.log("slippage: ", slippage);
- 
-
-        // console.log("assets: ", assets);
-        // console.log("swaps: ", swaps);
-        // console.log("funds: ", funds);
-        // console.log("limits: ", limits);
-
-        // converting into batch swapping 
-        // const batchSwap = {
-        //     kind: SwapKind.GivenIn,
-        //     assets: assets,
-        //     swaps: swaps,
-        //   funds: funds,
-        //   limits: limits,
-        //   deadline: deadline,
-        // };
-        // console.log("batchSwap: ", batchSwap);
-        const poolId = "0xf961a8f6d8c69e7321e78d254ecafbcc3a637621000000000000000000000001"
-
-        const singleSwap = {
-          poolId: poolId as `0x${string}`,
-          kind: 0,
-          assetIn: inToken.address as `0x${string}`,
-          assetOut: outToken.address as `0x${string}`,
-          amount: BigInt(swapAmount.amount),
-          userData: "0x" as `0x${string}`,
-        }
-
-        const limit = BigInt(1); // no limit 
-
-        const {request} = await publicClient.simulateContract({
-          address: VAULT_ADDRESS,
-          abi: reward_vault_abi,
-          functionName: 'swap',
-          args: [singleSwap, funds, limit, deadline],
-          account: address,
-        })
-
-        // approve spending
-        const swapTxnHash = await walletClient.writeContract(request);
-
-        // // send transaction 
-        // const batchTxnHash = await walletClient.writeContract({
-        //   address: "0x4Be03f781C497A489E3cB0287833452cA9B9E80B", // vault address
-        //   abi: reward_vault_abi,
-        //   functionName: 'batchSwap',
-        //   args: [
-        //     batchSwap.kind,
-        //     batchSwap.swaps,
-        //     batchSwap.assets,
-        //     batchSwap.funds,
-        //     batchSwap.limits.map(limit => BigInt(limit)),
-        //     batchSwap.deadline,
-        //   ],
-        //     account: address
+         // const swapTxn = new Swap({
+        //   chainId: chainid, 
+        //   paths: sorPaths, 
+        //   swapKind: SwapKind.GivenIn, 
+        //   userData: '0x',
         // });
 
-        console.log("swapTxnHash: ", swapTxnHash);
+        // //  // // // Query current rates
+        //  const queryOutput = await swapTxn.query(RPC_URL);
+        //  console.log("queryOutput: ", queryOutput);
+ 
+        //  // // Build transaction with 0.5% slippage
+        //  const slippage = Slippage.fromPercentage("0.5");
+        //  console.log("slippage: ", slippage);
 
-        const receipt = await waitForTransactionReceipt(walletClient, {hash: swapTxnHash})
-        console.log("Transaction receipt: ", receipt);
-        if (receipt.status === "success"){
-          console.log("Transaction confirmed!");
-          setTxStatus("Transaction confirmed!");
-          setIsSwapping(isSwapping);
-          setTxHash(txHash);
-          setError(error)
-        }else{
-          console.log("Transaction failed or reverted.");
-          setTxStatus("Transaction completed but may have failed. Please check your wallet");
-        }
+        // const poolId = "0xf961a8f6d8c69e7321e78d254ecafbcc3a637621000000000000000000000001" // how to get poolid
+
+        // const singleSwap = {
+        //   poolId: poolId as `0x${string}`,
+        //   kind: 0,
+        //   assetIn: wraptoken.address as `0x${string}`, // wrapped token to be further wrapped
+        //   assetOut: outToken.address as `0x${string}`,
+        //   amount: BigInt(swapAmount.amount),
+        //   userData: "0x" as `0x${string}`,
+        // }
+
+        // const limit = BigInt(1); // no limit 
+
+        // const {request} = await publicClient.simulateContract({
+        //   address: VAULT_ADDRESS,
+        //   abi: reward_vault_abi,
+        //   functionName: 'swap',
+        //   args: [singleSwap, funds, limit, deadline],
+        //   account: address,
+        // })
+
+        // approve spending
+        // const swapTxnHash = await walletClient.writeContract(request);
 
         // const callData = swapTxn.buildCall({
         //   slippage,
@@ -386,14 +300,91 @@ export default function BeraAITrader() {
         
         // // // send transaction
         // const txHash = await sendTransaction(walletClient, {
-        //   to: callData.to, data: callData.callData, value: callData.value
+        //   to: callData.to, 
+        //   data: callData.callData, 
+        //   value: callData.value
         // });
+
+        // batch swaps
+
+         // // assets
+        const assets = Array.from(new Set(routes.flatMap(route =>
+          route.hops.flatMap(hop => [hop.tokenIn, hop.tokenOut])
+        ))) as `0x${string}`[];
+        // swaps
+        const batchSwaps = routes.flatMap(route => route.hops.map((hop, index) => ({
+            poolId: hop.poolId as `0x${string}`,
+            assetInIndex: BigInt(assets.indexOf(hop.tokenIn as `0x${string}`)),
+            assetOutIndex: BigInt(assets.indexOf(hop.tokenOut as `0x${string}`)),
+            amount: index === 0 ? BigInt(swapAmount.amount) : BigInt(0),
+            userData: '0x' as `0x${string}`
+          }))
+        );
+
+        // funds
+        const funds = {
+          sender: address as `0x${string}`,
+          recipient: address as `0x${string}`,
+          fromInternalBalance: false,
+          toInternalBalance: false
+        };
+        // limits
+        const BatchLimits = assets.map((_, i) =>
+          i === 0 ? swapAmount.amount : -MAX_UINT256 // Note: `limits` is int256[]          
+        );
+        // deadline
+        const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
+        console.log("assets: ", assets);
+        console.log("swaps: ", batchSwaps);
+        console.log("funds: ", funds);
+        console.log("limits: ", BatchLimits);
+
+        // converting into batch swapping 
+        const batchSwap = {
+          kind: SwapKind.GivenIn,
+          assets: assets,
+          swaps: batchSwaps,
+          funds: funds,
+          limits: BatchLimits,
+          deadline: deadline,
+        };
+
+        console.log("batchSwap: ", batchSwap);
+        const batchTxnHash = await walletClient.writeContract({
+          address: VAULT[chainid], // vault address
+          abi: vaultV2Abi,
+          functionName: 'batchSwap',
+          args: [
+            batchSwap.kind,
+            batchSwap.swaps,
+            batchSwap.assets,
+            batchSwap.funds,
+            batchSwap.limits.map(limit => BigInt(limit)),
+            batchSwap.deadline,
+          ],
+            account: address
+        });
+
         // check if the transaction is null
-        // if (!txHash) {
-        //   console.error("Transaction is null.");
-        //   return;
-        // }
-        // console.log("Transaction sent: ", txHash);
+        if (!txHash) {
+          console.error("Transaction is null.");
+          return;
+        }
+        console.log("Transaction sent: ", txHash);
+        // console.log("swapTxnHash: ", swapTxnHash);
+
+        const receipt = await waitForTransactionReceipt(walletClient, {hash: batchTxnHash})
+        console.log("Transaction receipt: ", receipt);
+        if (receipt.status === "success"){
+          console.log("Transaction confirmed!");
+          setTxStatus("Transaction confirmed!");
+          setIsSwapping(isSwapping);
+          setTxHash(txHash);
+          setError(error)
+        }else{
+          console.log("Transaction failed or reverted.");
+          setTxStatus("Transaction completed but may have failed. Please check your wallet");
+        }
 
       } catch (error) {
         console.log(" Error in swapping: ", error);
@@ -483,7 +474,7 @@ export default function BeraAITrader() {
                   <div className="mt-3 text-right">
                     <button
                       onClick={() => swapToken()}
-                      className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition"
+                      className="px-4 py-1.5 bg-blue-600 cursor-pointer hover:bg-blue-700 text-white rounded-md text-sm transition"
                     >
                       🔁 Swap Token
                     </button>
