@@ -1,15 +1,17 @@
-// app/dapp/layout.tsx
-import { Providers } from "../components/providers"; // use the same providers
+'use client';
+import "../globals.css";
+import '@rainbow-me/rainbowkit/styles.css';
+import Footer from "../components/footer";
+import DAppNavbar from "./components/navbar";
+import { Providers } from "./providers";
 
 
 export default function DappLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
         <Providers>
-          {children}   {/* Dapp content */}
+          <DAppNavbar/>
+            {children} 
+          <Footer></Footer>
         </Providers>
-      </body>
-    </html>
   );
 }

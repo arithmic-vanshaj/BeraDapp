@@ -18,9 +18,114 @@
     --foreground: #ededed;
   }
 }
+/* nokia expanded font  */
+@font-face{
+  font-family: 'NokiaExpanded';
+  src: url('/fonts/NokiaExpanded.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+/* exwayer font */
+@font-face{
+  font-family: 'Exwayer';
+  src: url('/fonts/Exwayer.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  /* font-family: 'Exwayer', sans-serif; */
+  /* font-family: 'NokiaExpanded', sans-serif; */
+}
+
+
+/* Glitch Text Effect */
+.glitch-text {
+  position: relative;
+  color: #d56700;
+  animation: glitch 1.5s infinite;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: 'BeraFolio';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  color: rgb(255, 81, 0);
+  background: transparent;
+  clip: rect(0, 900px, 0, 0);
+}
+
+.glitch-text::before {
+  animation: glitchTop 1s infinite linear alternate-reverse;
+  color: rgb(0, 255, 255);
+}
+
+.glitch-text::after {
+  animation: glitchBottom 1s infinite linear alternate-reverse;
+  color: rgb(73, 73, 73);
+}
+
+@keyframes glitch {
+  0% {
+    transform: none;
+  }
+  20% {
+    transform: translate(-1px, 1px) skew(-1deg);
+  }
+  40% {
+    transform: translate(1px, -1px) skew(1deg);
+  }
+  60% {
+    transform: translate(-1px, 0px) skew(0.5deg);
+  }
+  80% {
+    transform: translate(1px, 1px) skew(-0.5deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes glitchTop {
+  0% {
+    clip: rect(0, 9999px, 0, 0);
+    transform: translate(4px, -4px);
+  }
+  10% {
+    clip: rect(0, 9999px, 8px, 0);
+    transform: translate(-2px, 0);
+  }
+  20% {
+    clip: rect(2px, 9999px, 12px, 0);
+    transform: translate(-1px, -1px);
+  }
+  100% {
+    clip: rect(0, 9999px, 0, 0);
+    transform: translate(0);
+  }
+}
+
+@keyframes glitchBottom {
+  0% {
+    clip: rect(0, 9999px, 0, 0);
+    transform: translate(-4px, 4px);
+  }
+  10% {
+    clip: rect(0, 9999px, 10px, 0);
+    transform: translate(1px, 1px);
+  }
+  20% {
+    clip: rect(5px, 9999px, 14px, 0);
+    transform: translate(2px, 0);
+  }
+  100% {
+    clip: rect(0, 9999px, 0, 0);
+    transform: translate(0);
+  }
 }

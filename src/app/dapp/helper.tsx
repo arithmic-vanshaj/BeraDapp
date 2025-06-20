@@ -1,7 +1,7 @@
 'use client'
 
 import { Address } from "viem";
-import { HONEY_TOKEN_ADDRESS, USDC_TOKEN_ADDRESS, WBERA_TOKEN_ADDRESS, WBTC_TOKEN_ADDRESS, WETH_TOKEN_ADDRESS } from "../constants/constant";
+import { BERA_TOKEN_ADDRESS, HONEY_TOKEN_ADDRESS, USDC_TOKEN_ADDRESS, WBERA_TOKEN_ADDRESS, WBTC_TOKEN_ADDRESS, WETH_TOKEN_ADDRESS } from "./components/constant";
 
 interface TokenInfo {
     address?: `0x${string}`;
@@ -11,7 +11,7 @@ interface TokenInfo {
 }
 
 export const TOKENS: Record<string, TokenInfo> = {
-    BERA: { address: undefined, symbol: 'BERA', decimals: 18, name: 'BERA (Native)' },
+    BERA: { address: BERA_TOKEN_ADDRESS, symbol: 'BERA', decimals: 18, name: 'BERA (Native)' },
     WBERA: { address: WBERA_TOKEN_ADDRESS as Address, symbol: 'WBERA', decimals: 18, name: 'Wrapped BERA' },
     HONEY: { address: HONEY_TOKEN_ADDRESS as Address, symbol: 'HONEY', decimals: 18, name: 'Honey Stablecoin' },
     USDC: { address: USDC_TOKEN_ADDRESS as Address, symbol: 'USDC.e', decimals: 6, name: 'USDC.e' },

@@ -9,9 +9,11 @@ import {
   // mainnet,
   sepolia,
   berachainTestnet,
+  mainnet,
 } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createPublicClient, type Chain } from 'viem'; // Import Chain type for clarity
+import { berachainbepolia, berachainmainnet } from './tools/customChains';
 
 // wallet connect
 const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
@@ -21,43 +23,9 @@ if (!WALLETCONNECT_PROJECT_ID) {
     );
   }
 
-// adding berachain bepolia testnet
-const berachainbepolia: Chain = {
-  id: 80069, // chain id 
-  name: 'Berachain Bepolia Testnet',
-  nativeCurrency:{
-    symbol: 'BERA',
-    name: 'Berachain Bepolia',
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: { http: ['https://bepolia.rpc.berachain.com/']}
-  },
-  testnet: true,
-  blockExplorers: {
-    default: { name: 'BeraBepoliaTrail', url: 'https://bepolia.beratrail.io/'}
-  }
-}
-
-// adding berachain mainnet
-const berachainmainnet: Chain = {
-  id: 80094,
-  name: 'Berachain Mainnet',
-  nativeCurrency : {
-    symbol: 'BERA',
-    name: 'Berachain Mainnet',
-    decimals: 18
-  },
-  rpcUrls: {default: { http: ['https://rpc.berachain.com/']} },
-  testnet: false, 
-  blockExplorers: {
-    default: { name: 'Bera Scan', url: 'https://berascan.com/'}
-  }
-}
-
 // adding the supporting chains from wagmi
 const supportedChains: readonly [Chain, ...Chain[]] = [
-    // mainnet, //ethereum mainnet
+    mainnet, //ethereum mainnet
     berachainTestnet,
     berachainbepolia,
     berachainmainnet,
@@ -73,11 +41,6 @@ export const config = getDefaultConfig({ //wallet actions
       return map;
     }, {} as Record<number, ReturnType<typeof http>>),
     ssr: true,
-})
-
-export const publicClient = createPublicClient({ // public actions
-  chain: berachainmainnet,
-  transport: http()
 })
 
 const queryClient = new QueryClient();

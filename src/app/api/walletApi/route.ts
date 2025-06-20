@@ -1,0 +1,1 @@
+export { POST } from "../../../../server/routes/walletRoute/walletRoute";
