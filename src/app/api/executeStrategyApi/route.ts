@@ -1,1 +1,1 @@
-export {POST} from "../../../../server/routes/strategyRoute/executeStartegyRoute";
+// export {POST} from "../../../../server/routes/strategyRoute/executeStartegyRoute";

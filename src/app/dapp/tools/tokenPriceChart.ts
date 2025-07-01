@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import dotenv from 'dotenv';
+dotenv.config();
 
 export interface TokenPriceProps {
   id: string;
@@ -17,18 +19,26 @@ export function useTokenPriceData({ id, contract_address }: TokenPriceProps) {
   const [chartData, setChartData] = useState<TokenChartData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const chartURL = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/chart`
+
   useEffect(() => {
     const fetchTokenHistoryData = async () => {
       try {
-        const url = `/api/tokenHistoryApi?id=${id}&contract_address=${contract_address}`;
-        const res = await fetch(url);
-        if (!res.ok) {
+        const chartRes = await fetch(chartURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id, contract_address }),
+        });
+        if (!chartRes.ok) {
             throw new Error("Failed to fetch from CoinGecko");
         }
+        
+        console.log("res: ", chartRes);
 
-        const data = await res.json();
-        // console.log(data);
-        // if (!Array.isArray(data.priceData)){ throw new Error(" Invalid data format")}
+        const data = await chartRes.json();
+        console.log(data);
 
         const formattedData: TokenChartData = {
           labels: data.prices.map((point: [number, number]) => new Date(point[0])),

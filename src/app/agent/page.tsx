@@ -5,6 +5,8 @@ import { useAccount } from 'wagmi';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { config } from '../dapp/providers';
 
+const agentURL = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/agent`;
+
 const Agent: React.FC = () => {
     const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
     const [assistantId, setAssistantId] = useState<string | undefined>();
@@ -25,7 +27,7 @@ const Agent: React.FC = () => {
           // setMessages([{ sender: 'You', text: userMessage }]);
           setLoading(true);
 
-          const response = await fetch('/api/agentApi', {
+          const response = await fetch(agentURL, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ userMessage, assistantId, threadId }),
@@ -59,7 +61,7 @@ const Agent: React.FC = () => {
         setLoading(true);
 
         try {
-          const response = await fetch('/api/agentApi', {
+          const response = await fetch(agentURL, {
               method: 'POST', 
               headers:{ 'Content-Type': 'application/json' },
               body: JSON.stringify({userMessage, assistantId, threadId})

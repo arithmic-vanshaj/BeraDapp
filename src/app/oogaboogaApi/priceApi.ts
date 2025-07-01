@@ -1,23 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 
+const tokenPriceCheckURL = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/tokenprice`;
+
 // Fetch data from external API
 async function fetchPriceApiData(currency: string) {
     const { chain } = useAccount();
-    const API_URL = `https://${chain}.api.oogabooga.io/v1/prices?currency=`; // using bera oogabooga price api
-    const response = await fetch(API_URL + `${currency}`,
-        {
-            method: 'GET',
-            headers: { 
-                "Authorization" : "Bearer" + `${process.env.OogaBoogaSecret}`, 
-                "Accept": "*/*" 
-            },
-        }
-    );
-    if (!response.ok) {
-        throw new Error('Failed to fetch data');
-    }
-    return response.json();
+    const apiRes = await fetch(tokenPriceCheckURL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({ chain, currency }),
+    })
 }
 
 // React hook to poll API at intervals

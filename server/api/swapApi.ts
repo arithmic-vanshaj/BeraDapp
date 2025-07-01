@@ -1,21 +1,25 @@
-import { BERA_TOKEN_ADDRESS, HONEY_TOKEN_ADDRESS } from "@/app/dapp/components/constant";
 import { Address, parseEther } from "viem";
-import { getAllowance } from "../strategy/getAllowance";
+import { getTokenAllowance } from "../strategy/getAllowance";
 import { approveAllowance } from "../strategy/approveAllowance";
 import { swap } from "../strategy/swapMethod";
 
 interface swapParams {
-    tokenIn: Address,
-    tokenOut: Address,
-    amount: bigint,
+    tokenIn: `0x${string}`,
+    tokenOut: `0x${string}`,
+    amount: number,
     to: Address,
     slippage: number,
     from: Address,
+    nativeToken: Address,
 }
 
 export async function executeSwapApi(swapParams: swapParams){
     try {
-        const allowance = await getAllowance(swapParams.tokenIn, swapParams.from);
+        const { status: allowanceStatus, allowance, error: allowanceError }  = await getTokenAllowance(swapParams.tokenIn, swapParams.nativeToken, swapParams.from);
+        if (allowanceStatus !== 200 || !allowance) {
+            console.error("Error in getAllowance:", allowanceError);
+            return { status: allowanceStatus || 500, message: "Failed to get allowance", error: allowanceError };
+        }
         console.log("allowance: ", allowance);
 
         let approveAllowanceTx;

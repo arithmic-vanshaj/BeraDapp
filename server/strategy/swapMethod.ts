@@ -1,9 +1,11 @@
 import { Address } from "viem";
+import dotenv from 'dotenv';
+dotenv.config();
 
 interface SwapParams{
     tokenIn: Address,
     tokenOut: Address,
-    amount: bigint,
+    amount: number,
     to: Address,
     slippage: number,
     from: Address,

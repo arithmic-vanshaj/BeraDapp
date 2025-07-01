@@ -1,4 +1,4 @@
-import { getBalanceTool } from "./getBalance";
+// import { getBalanceTool } from "./getBalance";
 import { getWalletAddressTool } from "./getWalletAddress";
 
 export interface toolConfig<T = any> { 
@@ -19,7 +19,7 @@ export interface toolConfig<T = any> {
 
 export const tools: Record<string, toolConfig> = {
     // add all the tools required 
-    get_Balance: getBalanceTool,
+    // get_Balance: getBalanceTool,
     get_wallet_address: getWalletAddressTool,
     // get_token_info: getTokenInfoTool,
 

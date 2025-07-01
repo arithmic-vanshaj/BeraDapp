@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 import { Run } from "openai/resources/beta/threads/runs/runs.mjs";
-import { Thread } from "openai/resources/beta/threads/threads.mjs";
 import { handleRunTools } from "./handleRunTools";
 
 // perform the run and handle functions

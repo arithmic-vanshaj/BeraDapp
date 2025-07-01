@@ -1,5 +1,7 @@
 import OpenAI from "openai";
-import { Thread } from "openai/resources/beta/threads/threads.mjs";
+// import { Thread } from "openai/resources/beta/threads/threads.mjs";
+
+type Thread = Awaited<ReturnType<OpenAI['beta']['threads']['create']>>;
 
 export async function createThread(client: OpenAI, message: string): Promise<Thread>{
     // creating a thread

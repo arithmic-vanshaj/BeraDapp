@@ -1,4 +1,6 @@
 import { Address } from "viem";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const headers = {Authorization: `Bearer ${process.env.OOGABOOGA_API_KEY}`};
 const url = process.env.OOGABOOGA_PUBLIC_API_URL;
@@ -6,7 +8,7 @@ const url = process.env.OOGABOOGA_PUBLIC_API_URL;
 export const approveAllowance = async (
 	token: Address,
     address: Address,
-	amount: bigint,
+	amount: number,
 ) => {
 	const publicApiUrl = new URL(`${url}/v1/approve`);
 	publicApiUrl.searchParams.set("token", token);

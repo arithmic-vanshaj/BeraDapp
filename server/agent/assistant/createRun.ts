@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { Run } from "openai/resources/beta/threads/runs/runs.mjs";
-// import { Thread } from "openai/resources/beta/threads/threads.mjs";
+
+type Run = Awaited<ReturnType<OpenAI['beta']['threads']['runs']['create']>>;
 
 // creating the run 
 export async function createRun(client: OpenAI, threadId: string, assistantID: string): Promise<Run>{

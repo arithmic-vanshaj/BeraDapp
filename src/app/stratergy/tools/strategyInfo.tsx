@@ -1,9 +1,11 @@
 'use client';
 import { config } from '@/app/dapp/providers';
+import { publicClient } from '@/app/dapp/viem/viemPublicClient';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import React, { useState } from 'react';
 import { Address } from 'viem';
 import { useAccount } from 'wagmi';
+import strategyHandler from './strategyHandler';
 
 type strategyModal = {
   strategyName: string;
@@ -18,33 +20,59 @@ type StrategyInfoModal = {
   strategy: strategyModal
 };
 
-async function executeStrategy(strategy: string, inputAmount: string, apr: number | string, token: string, address: Address){
+async function executeStrategy(
+  strategy: string,
+  inputAmount: string,
+  reqTokenAddress: `0x${string}`,
+  address: Address,
+  vaultAddress: Address,
+  slippagePercent: number
+) {
+
+  console.log("executeStrategy inputs:", {
+    strategy,
+    inputAmount,
+    reqTokenAddress,
+    address,
+    vaultAddress,
+    slippagePercent
+  });
+
+  const balance = await publicClient.getBalance({ address });
+  const tokenBalance = Number(balance);
+
+  const currentTokenAddress: `0x${string}` = `0x{string}`;
+
   try {
-    const response = await fetch('/api/executeStrategyApi/', {
-      method: 'POST', headers: {'Content-Type' : 'application/json'}, body: JSON.stringify({
-        strategy: strategy, 
-        inputAmount: inputAmount, 
-        apr: apr, 
-        token: token, 
-        address: address
-      })
-    });
+    // Call the execute strategy from the frontend
+    // If needed, swap. Call and await the swap result
+    const response = await strategyHandler(
+      strategy,
+      inputAmount,
+      reqTokenAddress,
+      currentTokenAddress,
+      address,
+      tokenBalance,
+      vaultAddress,
+      slippagePercent
+    );
 
-    const data = await response.json();
+    // const data = await response.json();
 
-    if (data.status !== 200){
-      throw new Error(data.error || "Internal Server Error");
-    }
+    // if (data.status !== 200) {
+    //   throw new Error(data.error || "Internal Server Error");
+    // }
 
-    return {hash: data.hash, rctp: data.rctp, error: data.error || null};
-  }catch (error){
+    // return { hash: data.hash, rctp: data.rctp, error: data.error || null };
+  } catch (error) {
     console.error("Error in executing strategy: ", error);
-    return {error: (error instanceof Error)? error.message: String(error)};
+    return { error: error instanceof Error ? error.message : String(error) };
   }
 }
 
 const StrategyInfoModal: React.FC<StrategyInfoModal> = ({ show, onClose, strategy }) => {
   const [inputAmount, setInputAmount] = useState('');
+  const [slippage, setSlippage] = useState('');
   const {isConnected, chain, address} = useAccount({config});
   const {openConnectModal} = useConnectModal();
   const [loading, setLoading] = useState(false);
@@ -64,10 +92,28 @@ const StrategyInfoModal: React.FC<StrategyInfoModal> = ({ show, onClose, strateg
 
       <h2 className="text-2xl font-semibold mb-2">{strategy.strategyName}</h2>
       <p className="text-sm text-gray-400 mb-4">{strategy.description}</p>
-
-      <div className="mb-4">
-        <span className="block text-sm text-gray-500">APR</span>
-        <span className="text-green-400 text-xl font-bold">{strategy.apr}%</span>
+ 
+      <div className="mb-4 flex items-end justify-between gap-4">
+        <div>
+          <span className="block text-sm text-gray-500">APR</span>
+          <span className="text-green-400 text-xl font-bold">{strategy.apr}%</span>
+        </div>
+        <div>
+          <label htmlFor="slippage" className="block text-sm text-gray-500 mb-1">
+            Enter slippage
+              </label>
+              <input
+            id="slippage"
+            type="number"
+            min="0"
+            max="1"
+            step="0.1"
+            value={slippage}
+            onChange={(e) => setSlippage(e.target.value)}
+            placeholder="0.01"
+            className="w-24 px-2 py-1 rounded-md bg-gray-800 border border-gray-700 text-white focus:outline-none focus:ring focus:ring-green-500"
+              />
+        </div>
       </div>
 
       <div className="mb-6">
@@ -92,8 +138,18 @@ const StrategyInfoModal: React.FC<StrategyInfoModal> = ({ show, onClose, strateg
                 setResult(null);
               try {
                   // executing strategy
-                  const res = await executeStrategy(strategy.strategyName, inputAmount, strategy.apr, strategy.yield_tag, `0x${address}`);
-                  setResult(res);
+                  const reqTokenAddress = '0xpseudoTokenAddress';
+                  const vaultAddress = '0xFalseVaultAddress';
+
+                  const res = await executeStrategy(
+                    strategy.strategyName, 
+                    `0x${inputAmount}`, 
+                    reqTokenAddress, 
+                    address as Address, 
+                    vaultAddress, 
+                    Number(slippage)
+                  ); //account address
+                  setResult(res ?? null);
                 } catch (err) {
                   const errorMsg = (err instanceof Error) ? err.message : String(err);
                   setResult({ error: errorMsg });

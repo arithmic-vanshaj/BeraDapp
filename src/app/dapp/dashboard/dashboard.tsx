@@ -67,28 +67,29 @@ const Overlay = () => {
   );
 }
 
+const walletURL = `${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/wallet`
 
 export function Dashboard() {
     const { isConnected, address } = useAccount();
     // send the address to the backend
     const [sentAddress, setSentAddress] = React.useState(false);
 
-    React.useEffect(() => {
-        const sendAddress = async () => {
-            if (isConnected && !sentAddress) {
-                // Generate a simple session token (for demo, use a random string)
-                const session = Math.random().toString(36).substring(2) + Date.now().toString(36);
-                await fetch('../../api/walletApi/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ walletAddress: address, session: session })
-                }).then(() => setSentAddress(true));
-            } else {
-                console.log("Error sending the wallet Address");
-            }
-        };
-        sendAddress();
-    }, [isConnected, address, sentAddress]);
+    // React.useEffect(() => {
+    //     const sendAddress = async () => {
+    //         if (isConnected && !sentAddress) {
+    //             const session = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    //             await fetch(walletURL, {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify({ walletAddress: address, session: session }),
+    //                 credentials: 'include'
+    //             });
+    //         } else {
+    //             console.log("Error sending the wallet Address");
+    //         }
+    //     };
+    //     sendAddress();
+    // }, [isConnected, address, sentAddress]);
 
   return (
     <div className='ml-30 mr-30 mt-4'>

@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 import { Run } from "openai/resources/beta/threads/runs/runs.mjs";
-import { Thread } from "openai/resources/beta/threads/threads.mjs";
 import { tools } from "../tools/tools";
 
 export async function handleRunTools(client: OpenAI, run: Run, threadId: string): Promise<Run>{

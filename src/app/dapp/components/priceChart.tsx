@@ -6,7 +6,7 @@ import {
   Box,
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
-import { WBERA_TOKEN_ADDRESS } from './constant';
+import { WBERA_TOKEN_ADDRESS } from '../../constants/constant';
 import { useTokenPriceData } from '../tools/tokenPriceChart';
 
 const chartMargin = { top: 2, bottom: 5, left: 5, right: 5 };
